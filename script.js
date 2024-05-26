@@ -30,8 +30,15 @@ const orbitControls = new OrbitControls(camera, renderer.domElement);
 const floorGeometry = new THREE.PlaneGeometry(50, 50);
 // TODO: Agregar una textura al suelo
 const floorMaterial = new THREE.MeshStandardMaterial({
-    color: 0x000000
+    color: 0xFFFFFF
 });
 
 const floor = new THREE.Mesh(floorGeometry, floorMaterial);
 scene.add(floor);
+
+// Game loop
+function game() {
+    renderer.render(scene, camera);
+}
+
+renderer.setAnimationLoop(game);
