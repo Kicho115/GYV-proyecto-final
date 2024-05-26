@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
+import { rotate } from 'three/examples/jsm/nodes/Nodes.js';
 // import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 // import * as dat from 'dat.gui';
 
@@ -11,6 +12,9 @@ document.body.appendChild(renderer.domElement);
 
 // Scene
 const scene = new THREE.Scene();
+
+const axesHelper = new THREE.AxesHelper(50);
+scene.add(axesHelper);
 
 // Camera
 const camera = new THREE.PerspectiveCamera(
@@ -29,11 +33,13 @@ const orbitControls = new OrbitControls(camera, renderer.domElement);
 // Floor
 const floorGeometry = new THREE.PlaneGeometry(50, 50);
 // TODO: Agregar una textura al suelo
-const floorMaterial = new THREE.MeshStandardMaterial({
+const floorMaterial = new THREE.MeshBasicMaterial({
     color: 0xFFFFFF
 });
 
 const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+floor.rotateX(-0.5 * Math.PI);
+
 scene.add(floor);
 
 // Game loop
