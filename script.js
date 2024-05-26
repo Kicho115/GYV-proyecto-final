@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/Addons.js';
 // import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 // import * as dat from 'dat.gui';
 
@@ -21,3 +22,16 @@ const camera = new THREE.PerspectiveCamera(
 
 // TODO: Cambiar la posicion de la camara cuando tengamops el laberinto
 camera.position.set(0,3,5);
+
+// TODO: Solo para test eliminar despues
+const orbitControls = new OrbitControls(camera, renderer.domElement);
+
+// Floor
+const floorGeometry = new THREE.PlaneGeometry(50, 50);
+// TODO: Agregar una textura al suelo
+const floorMaterial = new THREE.MeshStandardMaterial({
+    color: 0x000000
+});
+
+const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+scene.add(floor);
