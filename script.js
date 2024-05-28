@@ -29,10 +29,10 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.set(0, 10, 5);
 
-//const orbitControls = new OrbitControls(camera, renderer.domElement);
+const orbitControls = new OrbitControls(camera, renderer.domElement);
 
 // Floor
-const floorGeometry = new THREE.PlaneGeometry(60, 60);
+const floorGeometry = new THREE.PlaneGeometry(90, 82);
 const floorMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
 const floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotateX(-0.5 * Math.PI);
@@ -67,8 +67,8 @@ loader.load(
         
         // Asegurarse de que el laberinto tenga contacto con el suelo
         maze.position.y = 0;
-        maze.position.x = 0;
-        maze.position.z = 0 ;
+        maze.position.x = -10;
+        maze.position.z = -13;
         
         // Rotar el laberinto 90 grados en el eje Y
         //maze.rotation.x = Math.PI / 2;
@@ -193,7 +193,7 @@ function game() {
 
     // Check collision
     if (checkCollision(character, enemy)) {
-        resetGame();
+        //resetGame();
     }
 
     // Calculate score
