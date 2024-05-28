@@ -244,15 +244,19 @@ function playerMovement() {
 
     if (keysPressed['w']) {
         player.position.z -= moveSpeed;
+        player.rotation.y  = Math.PI;
     }
     if (keysPressed['s']) {
         player.position.z += moveSpeed;
+        player.rotation.y  = 0;
     }
     if (keysPressed['a']) {
         player.position.x -= moveSpeed;
+        player.rotation.y  = -Math.PI / 2;
     }
     if (keysPressed['d']) {
         player.position.x += moveSpeed;
+        player.rotation.y  = Math.PI / 2;
     }
     if (keysPressed['k']) {
         player.position.y += moveSpeed;
