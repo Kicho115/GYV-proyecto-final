@@ -95,13 +95,33 @@ gui.add(options, 'targetZ', -50, 50).onChange(function (e) {
 })
 
 // player
+let player;
 const playerUrl = './assets/player.obj';
 const loader = new OBJLoader();
-const playerGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-const playerMaterial = new THREE.MeshStandardMaterial({ color: 0x00FF00 });
-const player = new THREE.Mesh(playerGeometry, playerMaterial);
-player.position.set(0, 0.25, 0);
-scene.add(player);
+loader.load(
+    playerUrl,
+    (object) => {
+        player = object;
+        
+        // Ajustar la posición del personaje encima del suelo
+        player.position.set(0, 0.25, 0);
+        
+        player.scale.set(0.125, 0.125, 0.125);
+        const blackMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
+        player.traverse((child) => {
+            if (child.isMesh) {
+                child.material = blackMaterial;
+            }
+        });
+        scene.add(player);
+    },
+    (xhr) => {
+        console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
+    },
+    (error) => {
+        console.error('Error loading player:', error);
+    }
+);
 
 // Enemy
 const enemyGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
