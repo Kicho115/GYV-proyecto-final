@@ -8,6 +8,13 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
 
+// Adjust to full screen
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
 // Scene
 const scene = new THREE.Scene();
 const axesHelper = new THREE.AxesHelper(50);
@@ -35,6 +42,13 @@ const characterMaterial = new THREE.MeshBasicMaterial({ color: 0x00FF00 });
 const character = new THREE.Mesh(characterGeometry, characterMaterial);
 character.position.set(0, 0.25, 0);
 scene.add(character);
+
+// Enemy
+const enemyGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+const enemyMaterial = new THREE.MeshBasicMaterial({ color: 0xFF0000 });
+const enemy = new THREE.Mesh(enemyGeometry, enemyMaterial);
+enemy.position.set(5, 0.25, 5);
+scene.add(enemy);
 
 // Maze
 let maze;
@@ -67,11 +81,22 @@ loader.load(
 
 // Movement variables
 const moveSpeed = 0.1;
+const enemySpeed = 0.05;
 const keysPressed = {};
 
 // Available colors
 const colors = [0x00FF00, 0xFF0000, 0x0000FF];
 let currentColorIndex = 0;
+
+// Scoring variables
+let score = 0;
+let maxScore = 0;
+const scoreText = document.createElement('div');
+scoreText.style.position = 'absolute';
+scoreText.style.top = '10px';
+scoreText.style.right = '10px';
+scoreText.style.color = 'white';
+document.body.appendChild(scoreText);
 
 // Event listeners for keyboard input
 document.addEventListener('keydown', (event) => {
@@ -83,20 +108,15 @@ document.addEventListener('keyup', (event) => {
 
 // Title screen
 const titleScreen = document.getElementById('titleScreen');
+const maxScoreElement = document.getElementById('maxScore');
 let gameStarted = false;
 
 document.addEventListener('keydown', (event) => {
     if (event.code === 'Space' && !gameStarted) {
         titleScreen.style.display = 'none';
         gameStarted = true;
+        score = 0;
     }
-});
-
-// Color select
-const colorSelect = document.getElementById('colorSelect');
-colorSelect.addEventListener('change', (event) => {
-    const selectedColor = parseInt(event.target.value);
-    characterMaterial.color.setHex(selectedColor);
 });
 
 // Rotate color
@@ -107,26 +127,69 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
+// Function to check collision
+function checkCollision(obj1, obj2) {
+    const obj1Box = new THREE.Box3().setFromObject(obj1);
+    const obj2Box = new THREE.Box3().setFromObject(obj2);
+    return obj1Box.intersectsBox(obj2Box);
+}
+
+// Function to calculate score
+function calculateScore() {
+    const distance = Math.sqrt(
+        Math.pow(character.position.x, 2) + Math.pow(character.position.z, 2)
+    );
+    score = Math.floor(distance);
+    if (score > maxScore) {
+        maxScore = score;
+    }
+    scoreText.innerHTML = `Score: ${score}`;
+}
+
+// Reset game function
+function resetGame() {
+    character.position.set(0, 0.25, 0);
+    enemy.position.set(5, 0.25, 5);
+    gameStarted = false;
+    titleScreen.style.display = 'block';
+    maxScoreElement.innerHTML = `Puntuación máxima: ${maxScore}`;
+}
+
 // Game loop
 function game() {
-    // Character movement
-    if (keysPressed['w']) {
-        character.position.z -= moveSpeed;
-    }
-    if (keysPressed['s']) {
-        character.position.z += moveSpeed;
-    }
-    if (keysPressed['a']) {
-        character.position.x -= moveSpeed;
-    }
-    if (keysPressed['d']) {
-        character.position.x += moveSpeed;
-    }
+    if (gameStarted) {
+        // Character movement
+        if (keysPressed['w']) {
+            character.position.z -= moveSpeed;
+        }
+        if (keysPressed['s']) {
+            character.position.z += moveSpeed;
+        }
+        if (keysPressed['a']) {
+            character.position.x -= moveSpeed;
+        }
+        if (keysPressed['d']) {
+            character.position.x += moveSpeed;
+        }
 
-    // Update camera position to follow the character
-    camera.position.x = character.position.x;
-    camera.position.z = character.position.z + 5;
-    camera.lookAt(character.position);
+        // Enemy movement
+        const direction = new THREE.Vector3();
+        direction.subVectors(character.position, enemy.position).normalize();
+        enemy.position.add(direction.multiplyScalar(enemySpeed));
+
+        // Check collision
+        if (checkCollision(character, enemy)) {
+            resetGame();
+        }
+
+        // Calculate score
+        calculateScore();
+
+        // Update camera position to follow the character
+        camera.position.x = character.position.x;
+        camera.position.z = character.position.z + 5;
+        camera.lookAt(character.position);
+    }
 
     renderer.render(scene, camera);
 }
@@ -138,5 +201,12 @@ originText.style.position = 'absolute';
 originText.style.top = '10px';
 originText.style.left = '10px';
 originText.style.color = 'white';
-originText.innerHTML = `Character Origin: (${character.position.x.toFixed(2)}, ${character.position.z.toFixed(2)})`;
 document.body.appendChild(originText);
+
+function updateOriginText() {
+    originText.innerHTML = `Character Origin: (${character.position.x.toFixed(2)}, ${character.position.z.toFixed(2)})`;
+    requestAnimationFrame(updateOriginText);
+}
+updateOriginText();
+
+

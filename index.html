@@ -18,23 +18,28 @@
             background-image: url('./images/screenfondo.png');
             background-size: cover;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             color: white;
             font-size: 24px;
             z-index: 1;
         }
+        #maxScore {
+            font-size: 20px;
+            font-family: 'Arial', sans-serif;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
     <div id="titleScreen">
         <p>Presiona espacio para continuar</p>
+        <p id="maxScore">Puntuación máxima: 0</p>
     </div>
-    <select id="colorSelect">
-        <option value="0x00FF00">Verde</option>
-        <option value="0xFF0000">Rojo</option>
-        <option value="0x0000FF">Azul</option>
-    </select>
     <script src="script.js" type="module"></script>
 </body>
 </html>
+
+
+
