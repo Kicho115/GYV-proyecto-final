@@ -33,7 +33,7 @@ const orbitControls = new OrbitControls(camera, renderer.domElement);
 
 // Floor
 const floorGeometry = new THREE.PlaneGeometry(90, 82);
-const floorMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
+const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xFFFFFF });
 const floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotateX(-0.5 * Math.PI);
 scene.add(floor);
@@ -49,14 +49,14 @@ scene.add(spotLightHelper);
 
 // Character
 const characterGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-const characterMaterial = new THREE.MeshBasicMaterial({ color: 0x00FF00 });
+const characterMaterial = new THREE.MeshStandardMaterial({ color: 0x00FF00 });
 const character = new THREE.Mesh(characterGeometry, characterMaterial);
 character.position.set(0, 0.25, 0);
 scene.add(character);
 
 // Enemy
 const enemyGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-const enemyMaterial = new THREE.MeshBasicMaterial({ color: 0xFF0000 });
+const enemyMaterial = new THREE.MeshStandardMaterial({ color: 0xFF0000 });
 const enemy = new THREE.Mesh(enemyGeometry, enemyMaterial);
 enemy.position.set(5, 0.25, 5);
 scene.add(enemy);
@@ -82,7 +82,7 @@ loader.load(
         // Rotar el laberinto 90 grados en el eje Y
         //maze.rotation.x = Math.PI / 2;
         maze.scale.set(3, 3, 3);
-        const blackMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const blackMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
         maze.traverse((child) => {
             if (child.isMesh) {
                 child.material = blackMaterial;
