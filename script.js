@@ -157,39 +157,41 @@ function resetGame() {
 
 // Game loop
 function game() {
-    if (gameStarted) {
-        // Character movement
-        if (keysPressed['w']) {
-            character.position.z -= moveSpeed;
-        }
-        if (keysPressed['s']) {
-            character.position.z += moveSpeed;
-        }
-        if (keysPressed['a']) {
-            character.position.x -= moveSpeed;
-        }
-        if (keysPressed['d']) {
-            character.position.x += moveSpeed;
-        }
-
-        // Enemy movement
-        const direction = new THREE.Vector3();
-        direction.subVectors(character.position, enemy.position).normalize();
-        enemy.position.add(direction.multiplyScalar(enemySpeed));
-
-        // Check collision
-        if (checkCollision(character, enemy)) {
-            resetGame();
-        }
-
-        // Calculate score
-        calculateScore();
-
-        // Update camera position to follow the character
-        camera.position.x = character.position.x;
-        camera.position.z = character.position.z + 5;
-        camera.lookAt(character.position);
+    if (!gameStarted) {
+        renderer.render(scene, camera);
+        return;
+    } 
+    // Character movement
+    if (keysPressed['w']) {
+        character.position.z -= moveSpeed;
     }
+    if (keysPressed['s']) {
+        character.position.z += moveSpeed;
+    }
+    if (keysPressed['a']) {
+        character.position.x -= moveSpeed;
+    }
+    if (keysPressed['d']) {
+        character.position.x += moveSpeed;
+    }
+
+    // Enemy movement
+    const direction = new THREE.Vector3();
+    direction.subVectors(character.position, enemy.position).normalize();
+    enemy.position.add(direction.multiplyScalar(enemySpeed));
+
+    // Check collision
+    if (checkCollision(character, enemy)) {
+        resetGame();
+    }
+
+    // Calculate score
+    calculateScore();
+
+    // Update camera position to follow the character
+    camera.position.x = character.position.x;
+    camera.position.z = character.position.z + 5;
+    camera.lookAt(character.position);
 
     renderer.render(scene, camera);
 }
