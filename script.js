@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import * as dat from 'dat.gui';
 
 // Renderer
 const renderer = new THREE.WebGLRenderer();
@@ -46,6 +47,47 @@ scene.add(spotLight);
 
 const spotLightHelper = new THREE.SpotLightHelper(spotLight);
 scene.add(spotLightHelper);
+
+// Spotlight controls
+const gui = new dat.GUI();
+
+const options = {
+    targetX: 0,
+    // targetY: 0,
+    targetZ: 0,
+    angle: 0.2,
+    penumbra: 0,
+    intensity: 1
+};
+
+gui.add(options, 'angle', 0, Math.PI / 2).onChange(function (e) {
+    spotLight.angle = e;
+    spotLightHelper.update();
+});
+
+gui.add(options, 'penumbra', 0, 1).onChange(function (e) {
+    spotLight.penumbra = e;
+    spotLightHelper.update();
+});
+
+gui.add(options, 'intensity', 0, 100).onChange(function (e) {
+    spotLight.intensity = e;
+});
+
+gui.add(options, 'targetX', -50, 50).onChange(function (e) {
+    spotLight.target.position.x = e;
+    spotLightHelper.update();
+});
+
+// gui.add(options, 'targetY', -50, 50).onChange(function (e) {
+//     spotLight.target.position.y = e;
+//     spotLightHelper.update();
+// });
+
+gui.add(options, 'targetZ', -50, 50).onChange(function (e) {
+    spotLight.target.position.z = e;
+    spotLightHelper.update();
+})
 
 // Character
 const characterGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
@@ -208,6 +250,7 @@ function game() {
 
     // Spotlight following the player
     spotLight.position.set(...character.position);
+    spotLight.position.y += 2;
     spotLightHelper.update();
 
     // Calculate score
