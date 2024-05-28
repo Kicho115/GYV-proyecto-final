@@ -238,9 +238,9 @@ function checkMazeCollision(player, maze) {
     return collision;
 }
 
-// Player movement
+// Movimiento de Jugador
 function playerMovement() {
-    const previousPosition = player.position.clone();
+    //const previousPosition = player.position.clone();
 
     if (keysPressed['w']) {
         player.position.z -= moveSpeed;
@@ -258,12 +258,7 @@ function playerMovement() {
         player.position.x += moveSpeed;
         player.rotation.y  = Math.PI / 2;
     }
-    if (keysPressed['k']) {
-        player.position.y += moveSpeed;
-    }
-    if (keysPressed['g']) {
-        player.position.y -= moveSpeed;
-    }
+    
 
     // Check collision with maze walls
     // if (checkMazeCollision(player, maze)) {
@@ -335,24 +330,5 @@ function game() {
 
 renderer.setAnimationLoop(game);
 
-// Display player's origin
-const originText = document.createElement('div');
-originText.style.position = 'absolute';
-originText.style.top = '10px';
-originText.style.left = '10px';
-originText.style.color = 'white';
-document.body.appendChild(originText);
-
-function updateOriginText() {
-    originText.innerHTML = `player Origin: (${player.position.x.toFixed(2)}, ${player.position.z.toFixed(2)})`;
-    requestAnimationFrame(updateOriginText);
-}
-updateOriginText();
 
 
-// Rezise the renderer when the size of the window is changed
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-})
