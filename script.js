@@ -94,12 +94,14 @@ gui.add(options, 'targetZ', -50, 50).onChange(function (e) {
     spotLightHelper.update();
 })
 
-// Character
-const characterGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-const characterMaterial = new THREE.MeshStandardMaterial({ color: 0x00FF00 });
-const character = new THREE.Mesh(characterGeometry, characterMaterial);
-character.position.set(0, 0.25, 0);
-scene.add(character);
+// player
+const playerUrl = './assets/player.obj';
+const loader = new OBJLoader();
+const playerGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+const playerMaterial = new THREE.MeshStandardMaterial({ color: 0x00FF00 });
+const player = new THREE.Mesh(playerGeometry, playerMaterial);
+player.position.set(0, 0.25, 0);
+scene.add(player);
 
 // Enemy
 const enemyGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
@@ -112,14 +114,13 @@ scene.add(enemy);
 // Maze
 let maze;
 const mazeUrl = './assets/maze.obj';
-const loader = new OBJLoader();
 loader.load(
     mazeUrl,
     (object) => {
         maze = object;
         
         // Ajustar la posición del laberinto al mismo punto que el personaje
-        maze.position.set(character.position.x, 0, character.position.z);
+        maze.position.set(player.position.x, 0, player.position.z);
         
         // Asegurarse de que el laberinto tenga contacto con el suelo
         maze.position.y = 0;
@@ -190,7 +191,7 @@ document.addEventListener('keydown', (event) => {
 document.addEventListener('keydown', (event) => {
     if (event.key === 'c' && gameStarted) {
         currentColorIndex = (currentColorIndex + 1) % colors.length;
-        characterMaterial.color.setHex(colors[currentColorIndex]);
+        playerMaterial.color.setHex(colors[currentColorIndex]);
     }
 });
 
@@ -204,7 +205,7 @@ function checkCollision(obj1, obj2) {
 // Function to calculate score
 function calculateScore() {
     const distance = Math.sqrt(
-        Math.pow(character.position.x, 2) + Math.pow(character.position.z, 2)
+        Math.pow(player.position.x, 2) + Math.pow(player.position.z, 2)
     );
     score = Math.floor(distance);
     if (score > maxScore) {
@@ -215,7 +216,7 @@ function calculateScore() {
 
 // Reset game function
 function resetGame() {
-    character.position.set(0, 0.25, 0);
+    player.position.set(0, 0.25, 0);
     enemy.position.set(5, 0.25, 5);
     gameStarted = false;
     titleScreen.style.display = 'block';
@@ -229,37 +230,37 @@ function game() {
         return;
     } 
 
-    // Character movement
+    // player movement
     if (keysPressed['w']) {
-        character.position.z -= moveSpeed;
+        player.position.z -= moveSpeed;
     }
     if (keysPressed['s']) {
-        character.position.z += moveSpeed;
+        player.position.z += moveSpeed;
     }
     if (keysPressed['a']) {
-        character.position.x -= moveSpeed;
+        player.position.x -= moveSpeed;
     }
     if (keysPressed['d']) {
-        character.position.x += moveSpeed;
+        player.position.x += moveSpeed;
     }
 
     // Enemy movement
     const direction = new THREE.Vector3();
-    direction.subVectors(character.position, enemy.position).normalize();
+    direction.subVectors(player.position, enemy.position).normalize();
     enemy.position.add(direction.multiplyScalar(enemySpeed));
 
     // Check collision
-    if (checkCollision(character, enemy)) {
+    if (checkCollision(player, enemy)) {
         //resetGame();
     }
 
 
     // Spotlight following the player
-    spotLight.position.set(...character.position);
+    spotLight.position.set(...player.position);
     spotLight.position.y += 2;
 
     if (options.ModoExplorar) {
-        spotLight.target.position.set(...character.position);
+        spotLight.target.position.set(...player.position);
     }
 
     spotLightHelper.update();
@@ -267,17 +268,17 @@ function game() {
     // Calculate score
     calculateScore();
 
-    // Update camera position to follow the character
-    camera.position.x = character.position.x;
-    camera.position.z = character.position.z + 5;
-    camera.lookAt(character.position);
+    // Update camera position to follow the player
+    camera.position.x = player.position.x;
+    camera.position.z = player.position.z + 5;
+    camera.lookAt(player.position);
 
     renderer.render(scene, camera);
 }
 
 renderer.setAnimationLoop(game);
 
-// Display character's origin
+// Display player's origin
 const originText = document.createElement('div');
 originText.style.position = 'absolute';
 originText.style.top = '10px';
@@ -286,7 +287,7 @@ originText.style.color = 'white';
 document.body.appendChild(originText);
 
 function updateOriginText() {
-    originText.innerHTML = `Character Origin: (${character.position.x.toFixed(2)}, ${character.position.z.toFixed(2)})`;
+    originText.innerHTML = `player Origin: (${player.position.x.toFixed(2)}, ${player.position.z.toFixed(2)})`;
     requestAnimationFrame(updateOriginText);
 }
 updateOriginText();
