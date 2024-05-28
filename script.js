@@ -52,13 +52,18 @@ scene.add(spotLightHelper);
 const gui = new dat.GUI();
 
 const options = {
+    ModoExplorar: true,
     targetX: 0,
     // targetY: 0,
     targetZ: 0,
     angle: 0.2,
     penumbra: 0,
-    intensity: 1
+    intensity: 1,
 };
+
+gui.add(options, 'ModoExplorar').onChange(function(e) {
+    options.ModoExplorar = e;
+})
 
 gui.add(options, 'angle', 0, Math.PI / 2).onChange(function (e) {
     spotLight.angle = e;
@@ -248,9 +253,15 @@ function game() {
         //resetGame();
     }
 
+
     // Spotlight following the player
     spotLight.position.set(...character.position);
     spotLight.position.y += 2;
+
+    if (options.ModoExplorar) {
+        spotLight.target.position.set(...character.position);
+    }
+
     spotLightHelper.update();
 
     // Calculate score
