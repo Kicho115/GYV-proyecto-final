@@ -104,7 +104,7 @@ loader.load(
         player = object;
         
         // Ajustar la posición del personaje encima del suelo
-        player.position.set(0, 0.25, 0);
+        player.position.set(0, 0.75, 0);
         
         player.scale.set(0.125, 0.125, 0.125);
         const blackMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
@@ -222,6 +222,51 @@ function checkCollision(obj1, obj2) {
     return obj1Box.intersectsBox(obj2Box);
 }
 
+function checkMazeCollision(player, maze) {
+    const playerBox = new THREE.Box3().setFromObject(player);
+    let collision = false;
+
+    maze.traverse((child) => {
+        if (child.isMesh) {
+            const wallBox = new THREE.Box3().setFromObject(child);
+            if (playerBox.intersectsBox(wallBox)) {
+                collision = true;
+            }
+        }
+    });
+
+    return collision;
+}
+
+// Player movement
+function playerMovement() {
+    const previousPosition = player.position.clone();
+
+    if (keysPressed['w']) {
+        player.position.z -= moveSpeed;
+    }
+    if (keysPressed['s']) {
+        player.position.z += moveSpeed;
+    }
+    if (keysPressed['a']) {
+        player.position.x -= moveSpeed;
+    }
+    if (keysPressed['d']) {
+        player.position.x += moveSpeed;
+    }
+    if (keysPressed['k']) {
+        player.position.y += moveSpeed;
+    }
+    if (keysPressed['g']) {
+        player.position.y -= moveSpeed;
+    }
+
+    // Check collision with maze walls
+    // if (checkMazeCollision(player, maze)) {
+    //     player.position.copy(previousPosition); // Revert to previous position if there's a collision
+    // }
+}
+
 // Function to calculate score
 function calculateScore() {
     const distance = Math.sqrt(
@@ -249,21 +294,9 @@ function game() {
         renderer.render(scene, camera);
         return;
     } 
-
-    // player movement
-    if (keysPressed['w']) {
-        player.position.z -= moveSpeed;
-    }
-    if (keysPressed['s']) {
-        player.position.z += moveSpeed;
-    }
-    if (keysPressed['a']) {
-        player.position.x -= moveSpeed;
-    }
-    if (keysPressed['d']) {
-        player.position.x += moveSpeed;
-    }
-
+    
+    playerMovement();
+    
     // Enemy movement
     const direction = new THREE.Vector3();
     direction.subVectors(player.position, enemy.position).normalize();
