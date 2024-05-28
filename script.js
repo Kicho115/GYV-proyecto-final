@@ -210,3 +210,9 @@ function updateOriginText() {
 updateOriginText();
 
 
+// Rezise the renderer when the size of the window is changed
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+})
