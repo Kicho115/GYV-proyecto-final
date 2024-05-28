@@ -38,6 +38,15 @@ const floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotateX(-0.5 * Math.PI);
 scene.add(floor);
 
+// Spotlight
+const spotLight = new THREE.SpotLight(0xFFFFFF, 100);
+spotLight.position.set(-3, 5, 0);
+spotLight.castShadow = true;
+scene.add(spotLight);
+
+const spotLightHelper = new THREE.SpotLightHelper(spotLight);
+scene.add(spotLightHelper);
+
 // Character
 const characterGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 const characterMaterial = new THREE.MeshBasicMaterial({ color: 0x00FF00 });
@@ -172,6 +181,7 @@ function game() {
         renderer.render(scene, camera);
         return;
     } 
+
     // Character movement
     if (keysPressed['w']) {
         character.position.z -= moveSpeed;
@@ -196,6 +206,10 @@ function game() {
         //resetGame();
     }
 
+    // Spotlight following the player
+    spotLight.position.set(...character.position);
+    spotLightHelper.update();
+
     // Calculate score
     calculateScore();
 
@@ -206,6 +220,7 @@ function game() {
 
     renderer.render(scene, camera);
 }
+
 renderer.setAnimationLoop(game);
 
 // Display character's origin
