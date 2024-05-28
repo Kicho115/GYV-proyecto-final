@@ -29,6 +29,8 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.set(0, 10, 5);
 
+//const orbitControls = new OrbitControls(camera, renderer.domElement);
+
 // Floor
 const floorGeometry = new THREE.PlaneGeometry(60, 60);
 const floorMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
@@ -50,11 +52,13 @@ const enemy = new THREE.Mesh(enemyGeometry, enemyMaterial);
 enemy.position.set(5, 0.25, 5);
 scene.add(enemy);
 
+// TODO: cambiar el modelo del laberinto
 // Maze
 let maze;
+const mazeUrl = './assets/maze.obj';
 const loader = new OBJLoader();
 loader.load(
-    './images/laberinto.obj',
+    mazeUrl,
     (object) => {
         maze = object;
         
@@ -63,12 +67,18 @@ loader.load(
         
         // Asegurarse de que el laberinto tenga contacto con el suelo
         maze.position.y = 0;
-        maze.position.x = -20;
-        maze.position.z = 22;
+        maze.position.x = 0;
+        maze.position.z = 0 ;
         
         // Rotar el laberinto 90 grados en el eje Y
-        maze.rotation.x = Math.PI / 2;
-        
+        //maze.rotation.x = Math.PI / 2;
+        maze.scale.set(3, 3, 3);
+        const blackMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        maze.traverse((child) => {
+            if (child.isMesh) {
+                child.material = blackMaterial;
+            }
+        });
         scene.add(maze);
     },
     (xhr) => {
@@ -119,6 +129,7 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
+// TODO: checar esto
 // Rotate color
 document.addEventListener('keydown', (event) => {
     if (event.key === 'c' && gameStarted) {
