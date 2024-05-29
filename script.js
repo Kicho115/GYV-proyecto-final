@@ -3,6 +3,11 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import * as dat from 'dat.gui';
 
+
+// TODO: borrar hitboxes
+let playerHelper;
+let mazeHelper;
+
 // Renderer
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -96,7 +101,10 @@ loader.load(
     playerUrl,
     (object) => {
         player = object;
-        player.position.set(0, 0.75, 0);
+        
+        // Ajustar la posición del personaje encima del suelo
+        player.position.set(3, 10.75, -3);
+        
         player.scale.set(0.125, 0.125, 0.125);
         const blackMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
         player.traverse((child) => {
@@ -104,6 +112,8 @@ loader.load(
                 child.material = blackMaterial;
             }
         });
+        playerHelper = new THREE.BoxHelper(player, 0xff0000); // Color rojo para la hitbox
+        scene.add(playerHelper);
         scene.add(player);
     },
     (xhr) => {
@@ -128,14 +138,26 @@ loader.load(
     mazeUrl,
     (object) => {
         maze = object;
-        maze.position.set(-10, 0, -13);
-        maze.scale.set(3, 3, 3);
+        
+        // Ajustar la posición del laberinto al mismo punto que el personaje
+        maze.position.set(player.position.x, 0, player.position.z);
+        
+        // Asegurarse de que el laberinto tenga contacto con el suelo
+        maze.position.y = 1;
+        maze.position.x = 1;
+        maze.position.z = 1;
+        
+        // Rotar el laberinto 90 grados en el eje Y
+        maze.rotation.x = Math.PI / 2;
+        maze.scale.set(10, 10, 10);
         const blackMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
         maze.traverse((child) => {
             if (child.isMesh) {
                 child.material = blackMaterial;
             }
         });
+        mazeHelper = new THREE.BoxHelper(maze, 0xff0000); // Color rojo para la hitbox
+        scene.add(mazeHelper);
         scene.add(maze);
     },
     (xhr) => {
@@ -199,6 +221,58 @@ function checkCollision(obj1, obj2) {
     const obj1Box = new THREE.Box3().setFromObject(obj1);
     const obj2Box = new THREE.Box3().setFromObject(obj2);
     return obj1Box.intersectsBox(obj2Box);
+}
+
+function checkMazeCollision(player, maze) {
+    const playerBox = new THREE.Box3().setFromObject(player);
+    let collision = false;
+
+    maze.traverse((child) => {
+        if (child.isMesh) {
+            const wallBox = new THREE.Box3().setFromObject(child);
+            if (playerBox.intersectsBox(wallBox)) {
+                collision = true;
+            }
+        }
+    });
+
+    return collision;
+}
+
+// Movimiento de Jugador
+function playerMovement() {
+    const previousPosition = player.position.clone();
+
+    if (keysPressed['w']) {
+        player.position.z -= moveSpeed;
+        player.rotation.y  = Math.PI;
+    }
+    if (keysPressed['s']) {
+        player.position.z += moveSpeed;
+        player.rotation.y  = 0;
+    }
+    if (keysPressed['a']) {
+        player.position.x -= moveSpeed;
+        player.rotation.y  = -Math.PI / 2;
+    }
+    if (keysPressed['d']) {
+        player.position.x += moveSpeed;
+        player.rotation.y  = Math.PI / 2;
+    }
+    if (keysPressed['1']) {
+        player.position.y += moveSpeed;
+        player.rotation.y  = Math.PI / 2;
+    }
+    if (keysPressed['2']) {
+        player.position.y -= moveSpeed;
+        player.rotation.y  = Math.PI / 2;
+    }
+    
+
+    // Check collision with maze walls
+    if (checkMazeCollision(player, maze)) {
+        player.position.copy(previousPosition); // Revert to previous position if there's a collision
+    }
 }
 
 // Function to calculate score
@@ -274,6 +348,10 @@ function game() {
     camera.position.x = player.position.x;
     camera.position.z = player.position.z + 5;
     camera.lookAt(player.position);
+    if(playerHelper) {  
+        playerHelper.update();
+    }
+
 
     renderer.render(scene, camera);
 }
@@ -299,7 +377,3 @@ function playerMovement() {
 }
 
 renderer.setAnimationLoop(game);
-
-
-
-
