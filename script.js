@@ -103,7 +103,6 @@ loader.load(
     playerUrl,
     (object) => {
         player = object;
-        player.position.set(0, 0.75, -5);
         player.scale.set(0.125, 0.125, 0.125);
         const blackMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
         player.traverse((child) => {
@@ -111,6 +110,8 @@ loader.load(
                 child.material = blackMaterial;
             }
         });
+        // Make the player spawn at the start of the maze
+        player.position.set(5, 1, 110);
         playerHelper = new THREE.BoxHelper(player, 0xff0000); // Color rojo para la hitbox
         scene.add(playerHelper);
         scene.add(player);
