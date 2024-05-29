@@ -24,6 +24,9 @@ const scene = new THREE.Scene();
 const axesHelper = new THREE.AxesHelper(50);
 scene.add(axesHelper);
 
+const ambientLight = new THREE.AmbientLight(0xFFFFFF, 100);
+scene.add(ambientLight);
+
 // Camera
 const camera = new THREE.PerspectiveCamera(
     75, // FOV
@@ -36,9 +39,10 @@ camera.position.set(0, 10, 5);
 const orbitControls = new OrbitControls(camera, renderer.domElement);
 
 // Floor
-const floorGeometry = new THREE.PlaneGeometry(90, 82);
+const floorGeometry = new THREE.PlaneGeometry(250, 250);
 const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xFFFFFF });
 const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+console.log(floor.position);
 floor.rotateX(-0.5 * Math.PI);
 scene.add(floor);
 
@@ -99,7 +103,7 @@ loader.load(
     playerUrl,
     (object) => {
         player = object;
-        player.position.set(0, 0.75, 0);
+        player.position.set(0, 0.75, -5);
         player.scale.set(0.125, 0.125, 0.125);
         const blackMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
         player.traverse((child) => {
@@ -133,14 +137,21 @@ loader.load(
     mazeUrl,
     (object) => {
         maze = object;
-        maze.position.set(-10, 0, -13);
-        maze.scale.set(3, 3, 3);
+        maze.scale.set(10, 10, 10);
         const blackMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
         maze.traverse((child) => {
             if (child.isMesh) {
                 child.material = blackMaterial;
             }
         });
+        // Calcular el centro del bounding box del laberinto
+        const mazeBoundingBox = new THREE.Box3().setFromObject(maze);
+        const mazeCenter = new THREE.Vector3();
+        mazeBoundingBox.getCenter(mazeCenter);
+
+        // Mover el laberinto para que su centro esté en el origen
+        maze.position.sub(mazeCenter);
+
         scene.add(maze);
     },
     (xhr) => {
