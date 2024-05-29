@@ -54,7 +54,6 @@ const gui = new dat.GUI();
 const options = {
     ModoExplorar: true,
     targetX: 0,
-    // targetY: 0,
     targetZ: 0,
     angle: 0.2,
     penumbra: 0,
@@ -84,17 +83,12 @@ gui.add(options, 'targetX', -50, 50).onChange(function (e) {
     spotLightHelper.update();
 });
 
-// gui.add(options, 'targetY', -50, 50).onChange(function (e) {
-//     spotLight.target.position.y = e;
-//     spotLightHelper.update();
-// });
-
 gui.add(options, 'targetZ', -50, 50).onChange(function (e) {
     spotLight.target.position.z = e;
     spotLightHelper.update();
 })
 
-// player
+// Player
 let player;
 const playerUrl = './assets/player.obj';
 const loader = new OBJLoader();
@@ -102,10 +96,7 @@ loader.load(
     playerUrl,
     (object) => {
         player = object;
-        
-        // Ajustar la posición del personaje encima del suelo
         player.position.set(0, 0.75, 0);
-        
         player.scale.set(0.125, 0.125, 0.125);
         const blackMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
         player.traverse((child) => {
@@ -130,7 +121,6 @@ const enemy = new THREE.Mesh(enemyGeometry, enemyMaterial);
 enemy.position.set(5, 0.25, 5);
 scene.add(enemy);
 
-// TODO: cambiar el modelo del laberinto
 // Maze
 let maze;
 const mazeUrl = './assets/maze.obj';
@@ -138,17 +128,7 @@ loader.load(
     mazeUrl,
     (object) => {
         maze = object;
-        
-        // Ajustar la posición del laberinto al mismo punto que el personaje
-        maze.position.set(player.position.x, 0, player.position.z);
-        
-        // Asegurarse de que el laberinto tenga contacto con el suelo
-        maze.position.y = 0;
-        maze.position.x = -10;
-        maze.position.z = -13;
-        
-        // Rotar el laberinto 90 grados en el eje Y
-        //maze.rotation.x = Math.PI / 2;
+        maze.position.set(-10, 0, -13);
         maze.scale.set(3, 3, 3);
         const blackMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
         maze.traverse((child) => {
@@ -177,7 +157,7 @@ let currentColorIndex = 0;
 
 // Scoring variables
 let score = 0;
-let maxScore = 0;
+let highScores = JSON.parse(localStorage.getItem('highScores')) || [];
 const scoreText = document.createElement('div');
 scoreText.style.position = 'absolute';
 scoreText.style.top = '10px';
@@ -195,7 +175,7 @@ document.addEventListener('keyup', (event) => {
 
 // Title screen
 const titleScreen = document.getElementById('titleScreen');
-const maxScoreElement = document.getElementById('maxScore');
+const highScoresList = document.getElementById('highScoresList');
 let gameStarted = false;
 
 document.addEventListener('keydown', (event) => {
@@ -206,12 +186,11 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
-// TODO: checar esto
 // Rotate color
 document.addEventListener('keydown', (event) => {
     if (event.key === 'c' && gameStarted) {
         currentColorIndex = (currentColorIndex + 1) % colors.length;
-        playerMaterial.color.setHex(colors[currentColorIndex]);
+        player.material.color.setHex(colors[currentColorIndex]);
     }
 });
 
@@ -222,59 +201,12 @@ function checkCollision(obj1, obj2) {
     return obj1Box.intersectsBox(obj2Box);
 }
 
-function checkMazeCollision(player, maze) {
-    const playerBox = new THREE.Box3().setFromObject(player);
-    let collision = false;
-
-    maze.traverse((child) => {
-        if (child.isMesh) {
-            const wallBox = new THREE.Box3().setFromObject(child);
-            if (playerBox.intersectsBox(wallBox)) {
-                collision = true;
-            }
-        }
-    });
-
-    return collision;
-}
-
-// Movimiento de Jugador
-function playerMovement() {
-    //const previousPosition = player.position.clone();
-
-    if (keysPressed['w']) {
-        player.position.z -= moveSpeed;
-        player.rotation.y  = Math.PI;
-    }
-    if (keysPressed['s']) {
-        player.position.z += moveSpeed;
-        player.rotation.y  = 0;
-    }
-    if (keysPressed['a']) {
-        player.position.x -= moveSpeed;
-        player.rotation.y  = -Math.PI / 2;
-    }
-    if (keysPressed['d']) {
-        player.position.x += moveSpeed;
-        player.rotation.y  = Math.PI / 2;
-    }
-    
-
-    // Check collision with maze walls
-    // if (checkMazeCollision(player, maze)) {
-    //     player.position.copy(previousPosition); // Revert to previous position if there's a collision
-    // }
-}
-
 // Function to calculate score
 function calculateScore() {
     const distance = Math.sqrt(
         Math.pow(player.position.x, 2) + Math.pow(player.position.z, 2)
     );
     score = Math.floor(distance);
-    if (score > maxScore) {
-        maxScore = score;
-    }
     scoreText.innerHTML = `Score: ${score}`;
 }
 
@@ -284,8 +216,30 @@ function resetGame() {
     enemy.position.set(5, 0.25, 5);
     gameStarted = false;
     titleScreen.style.display = 'block';
-    maxScoreElement.innerHTML = `Puntuación máxima: ${maxScore}`;
+    updateHighScores(score);
+    displayHighScores();
 }
+
+// Update high scores
+function updateHighScores(newScore) {
+    highScores.push(newScore);
+    highScores.sort((a, b) => b - a);
+    highScores = highScores.slice(0, 5);
+    localStorage.setItem('highScores', JSON.stringify(highScores));
+}
+
+// Display high scores
+function displayHighScores() {
+    highScoresList.innerHTML = '';
+    highScores.forEach((score, index) => {
+        const li = document.createElement('li');
+        li.textContent = `${index + 1}. ${score}`;
+        highScoresList.appendChild(li);
+    });
+}
+
+// Initialize high scores on load
+displayHighScores();
 
 // Game loop
 function game() {
@@ -293,9 +247,9 @@ function game() {
         renderer.render(scene, camera);
         return;
     } 
-    
+
     playerMovement();
-    
+
     // Enemy movement
     const direction = new THREE.Vector3();
     direction.subVectors(player.position, enemy.position).normalize();
@@ -303,18 +257,14 @@ function game() {
 
     // Check collision
     if (checkCollision(player, enemy)) {
-        //resetGame();
+        resetGame();
     }
-
 
     // Spotlight following the player
-    spotLight.position.set(...player.position);
-    spotLight.position.y += 2;
-
+    spotLight.position.set(player.position.x, player.position.y + 2, player.position.z);
     if (options.ModoExplorar) {
-        spotLight.target.position.set(...player.position);
+        spotLight.target.position.set(player.position.x, player.position.y, player.position.z);
     }
-
     spotLightHelper.update();
 
     // Calculate score
@@ -328,7 +278,28 @@ function game() {
     renderer.render(scene, camera);
 }
 
+// Movimiento de Jugador
+function playerMovement() {
+    if (keysPressed['w']) {
+        player.position.z -= moveSpeed;
+        player.rotation.y = Math.PI;
+    }
+    if (keysPressed['s']) {
+        player.position.z += moveSpeed;
+        player.rotation.y = 0;
+    }
+    if (keysPressed['a']) {
+        player.position.x -= moveSpeed;
+        player.rotation.y = -Math.PI / 2;
+    }
+    if (keysPressed['d']) {
+        player.position.x += moveSpeed;
+        player.rotation.y = Math.PI / 2;
+    }
+}
+
 renderer.setAnimationLoop(game);
+
 
 
 

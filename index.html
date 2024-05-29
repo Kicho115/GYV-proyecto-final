@@ -25,21 +25,32 @@
             font-size: 24px;
             z-index: 1;
         }
-        #maxScore {
+        #highScores {
             font-size: 20px;
             font-family: 'Arial', sans-serif;
             margin-top: 10px;
+        }
+        #highScores ul {
+            padding: 0;
+            list-style: none;
+            text-align: center;
         }
     </style>
 </head>
 <body>
     <div id="titleScreen">
         <p>Presiona espacio para continuar</p>
-        <p id="maxScore">Puntuación máxima: 0</p>
+        <div id="highScores">
+            <h2>High Scores</h2>
+            <ul id="highScoresList">
+                <!-- High scores will be populated here -->
+            </ul>
+        </div>
     </div>
     <script src="script.js" type="module"></script>
 </body>
 </html>
+
 
 
 
