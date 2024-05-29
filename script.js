@@ -133,7 +133,7 @@ scene.add(enemy);
 
 // Maze
 let maze;
-const mazeUrl = './assets/maze.obj';
+const mazeUrl = './images/dedalo.obj';
 loader.load(
     mazeUrl,
     (object) => {
@@ -223,6 +223,7 @@ function checkCollision(obj1, obj2) {
     return obj1Box.intersectsBox(obj2Box);
 }
 
+// Function to check collision with maze walls
 function checkMazeCollision(player, maze) {
     const playerBox = new THREE.Box3().setFromObject(player);
     let collision = false;
@@ -237,42 +238,6 @@ function checkMazeCollision(player, maze) {
     });
 
     return collision;
-}
-
-// Movimiento de Jugador
-function playerMovement() {
-    const previousPosition = player.position.clone();
-
-    if (keysPressed['w']) {
-        player.position.z -= moveSpeed;
-        player.rotation.y  = Math.PI;
-    }
-    if (keysPressed['s']) {
-        player.position.z += moveSpeed;
-        player.rotation.y  = 0;
-    }
-    if (keysPressed['a']) {
-        player.position.x -= moveSpeed;
-        player.rotation.y  = -Math.PI / 2;
-    }
-    if (keysPressed['d']) {
-        player.position.x += moveSpeed;
-        player.rotation.y  = Math.PI / 2;
-    }
-    if (keysPressed['1']) {
-        player.position.y += moveSpeed;
-        player.rotation.y  = Math.PI / 2;
-    }
-    if (keysPressed['2']) {
-        player.position.y -= moveSpeed;
-        player.rotation.y  = Math.PI / 2;
-    }
-    
-
-    // Check collision with maze walls
-    if (checkMazeCollision(player, maze)) {
-        player.position.copy(previousPosition); // Revert to previous position if there's a collision
-    }
 }
 
 // Function to calculate score
@@ -329,10 +294,10 @@ function game() {
     direction.subVectors(player.position, enemy.position).normalize();
     enemy.position.add(direction.multiplyScalar(enemySpeed));
 
-    // Check collision
-    if (checkCollision(player, enemy)) {
+    // Check collision with enemy
+    /*if (checkCollision(player, enemy)) {
         resetGame();
-    }
+    }*/
 
     // Spotlight following the player
     spotLight.position.set(player.position.x, player.position.y + 2, player.position.z);
@@ -356,5 +321,30 @@ function game() {
     renderer.render(scene, camera);
 }
 
+// Player movement function
+function playerMovement() {
+    const oldPosition = player.position.clone();
+
+    if (keysPressed['w']) {
+        player.position.z -= moveSpeed;
+        player.rotation.y = Math.PI;
+    }
+    if (keysPressed['s']) {
+        player.position.z += moveSpeed;
+        player.rotation.y = 0;
+    }
+    if (keysPressed['a']) {
+        player.position.x -= moveSpeed;
+        player.rotation.y = -Math.PI / 2;
+    }
+    if (keysPressed['d']) {
+        player.position.x += moveSpeed;
+        player.rotation.y = Math.PI / 2;
+    }
+
+    if (checkMazeCollision(player, maze)) {
+        player.position.copy(oldPosition);
+    }
+}
 
 renderer.setAnimationLoop(game);
