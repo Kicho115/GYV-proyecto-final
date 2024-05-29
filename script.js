@@ -3,11 +3,6 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import * as dat from 'dat.gui';
 
-
-// TODO: borrar hitboxes
-let playerHelper;
-let mazeHelper;
-
 // Renderer
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -101,10 +96,7 @@ loader.load(
     playerUrl,
     (object) => {
         player = object;
-        
-        // Ajustar la posición del personaje encima del suelo
-        player.position.set(3, 10.75, -3);
-        
+        player.position.set(0, 0.75, 0);
         player.scale.set(0.125, 0.125, 0.125);
         const blackMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
         player.traverse((child) => {
@@ -112,8 +104,6 @@ loader.load(
                 child.material = blackMaterial;
             }
         });
-        playerHelper = new THREE.BoxHelper(player, 0xff0000); // Color rojo para la hitbox
-        scene.add(playerHelper);
         scene.add(player);
     },
     (xhr) => {
@@ -138,26 +128,14 @@ loader.load(
     mazeUrl,
     (object) => {
         maze = object;
-        
-        // Ajustar la posición del laberinto al mismo punto que el personaje
-        maze.position.set(player.position.x, 0, player.position.z);
-        
-        // Asegurarse de que el laberinto tenga contacto con el suelo
-        maze.position.y = 1;
-        maze.position.x = 1;
-        maze.position.z = 1;
-        
-        // Rotar el laberinto 90 grados en el eje Y
-        maze.rotation.x = Math.PI / 2;
-        maze.scale.set(10, 10, 10);
+        maze.position.set(-10, 0, -13);
+        maze.scale.set(3, 3, 3);
         const blackMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
         maze.traverse((child) => {
             if (child.isMesh) {
                 child.material = blackMaterial;
             }
         });
-        mazeHelper = new THREE.BoxHelper(maze, 0xff0000); // Color rojo para la hitbox
-        scene.add(mazeHelper);
         scene.add(maze);
     },
     (xhr) => {
@@ -313,10 +291,6 @@ function game() {
     camera.position.x = player.position.x;
     camera.position.z = player.position.z + 5;
     camera.lookAt(player.position);
-    if(playerHelper) {  
-        playerHelper.update();
-    }
-
 
     renderer.render(scene, camera);
 }
