@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import * as dat from 'dat.gui';
+import { GLTFLoader } from 'three/examples/jsm/Addons.js';
 
 // TODO: borrar hitboxes
 let playerHelper;
@@ -132,12 +133,18 @@ loader.load(
 );
 
 // Enemy
-const enemyGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-const enemyMaterial = new THREE.MeshStandardMaterial({ color: 0xFF0000 });
-const enemy = new THREE.Mesh(enemyGeometry, enemyMaterial);
+const assetLoader = new GLTFLoader();
+let enemy;
 const enemyStartPosition = new THREE.Vector3(5, 1, 150);
-enemy.position.copy(enemyStartPosition);
-scene.add(enemy);
+const enemyUrl = new URL('assets/enemy.glb', import.meta.url);
+assetLoader.load(enemyUrl.href, function (gltf) {
+    enemy = gltf.scene;
+    enemy.position.copy(enemyStartPosition);
+    enemy.scale.multiplyScalar(0.25);
+    scene.add(enemy);
+}, undefined, function (error) {
+    console.error(error);
+})
 
 // Maze texture settings
 const mazeTextureUrl = floorTexture;
@@ -317,6 +324,11 @@ function isObjectIluminated(object, spotLight) {
     }
 };
 
+// Animations
+let mixer;
+
+
+
 
 // Almacenar las posiciones del jugador
 const playerPositions = [];
@@ -330,7 +342,9 @@ function copyPlayerPosition() {
         console.log('Posición de hace 10 segundos:', oldPosition);
 
         // Asignar la posición antigua del jugador al enemigo
-        enemy.position.copy(oldPosition);
+        if (enemy) {
+            enemy.position.copy(oldPosition);
+        }
     }
 }
 
@@ -344,9 +358,11 @@ function game() {
     playerMovement();
 
     // Enemy movement hacia el jugador
-    const direction = new THREE.Vector3();
-    direction.subVectors(player.position, enemy.position).normalize();
-    enemy.position.add(direction.multiplyScalar(enemySpeed));
+    if (enemy) {
+        const direction = new THREE.Vector3();
+        direction.subVectors(player.position, enemy.position).normalize();
+        enemy.position.add(direction.multiplyScalar(enemySpeed));
+    }
 
     // Check collision with enemy
     /*if (checkCollision(player, enemy)) {
