@@ -135,7 +135,7 @@ loader.load(
 const enemyGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 const enemyMaterial = new THREE.MeshStandardMaterial({ color: 0xFF0000 });
 const enemy = new THREE.Mesh(enemyGeometry, enemyMaterial);
-const enemyStartPosition = new THREE.Vector3(5, 0.25, 5);
+const enemyStartPosition = new THREE.Vector3(5, 1, 150);
 enemy.position.copy(enemyStartPosition);
 scene.add(enemy);
 
@@ -315,6 +315,23 @@ function isObjectIluminated(object, spotLight) {
         const distance = intersects[0].distance;
         // do smth here
     }
+};
+
+
+// Almacenar las posiciones del jugador
+const playerPositions = [];
+const timeInterval = 100; // Intervalo de tiempo en ms para almacenar la posición del jugador
+let elapsedTime = 0;
+
+// Función para copiar la posición del jugador después de 10 segundos
+function copyPlayerPosition() {
+    if (playerPositions.length > 0) {
+        const oldPosition = playerPositions.shift(); // Obtener la posición de hace 10 segundos
+        console.log('Posición de hace 10 segundos:', oldPosition);
+
+        // Asignar la posición antigua del jugador al enemigo
+        enemy.position.copy(oldPosition);
+    }
 }
 
 // Game loop
@@ -322,25 +339,19 @@ function game() {
     if (!gameStarted) {
         renderer.render(scene, camera);
         return;
-    } 
+    }
 
     playerMovement();
 
-    // Enemy movement
-    const oldEnemyPosition = enemy.position.clone();
+    // Enemy movement hacia el jugador
     const direction = new THREE.Vector3();
     direction.subVectors(player.position, enemy.position).normalize();
     enemy.position.add(direction.multiplyScalar(enemySpeed));
 
-    // Check enemy collision with maze walls
-    if (checkMazeCollision(enemy, maze)) {
-        enemy.position.copy(oldEnemyPosition);
-    }
-
     // Check collision with enemy
-    if (checkCollision(player, enemy)) {
+    /*if (checkCollision(player, enemy)) {
         resetGame();
-    }
+    }*/
 
     // Spotlight following the player
     spotLight.position.set(player.position.x, player.position.y + 2, player.position.z);
@@ -357,8 +368,23 @@ function game() {
     camera.position.z = player.position.z + 5;
     camera.lookAt(player.position);
 
-    if(playerHelper) {  
+    if (playerHelper) {
         playerHelper.update();
+    }
+
+    // Almacenar la posición del jugador cada intervalo de tiempo
+    if (elapsedTime >= 10000) {
+        copyPlayerPosition();
+    }else {
+        elapsedTime += timeInterval;
+    }
+
+    // Almacenar la posición actual del jugador
+    playerPositions.push(player.position.clone());
+
+    // Limitar el tamaño del array dewa posiciones para que no crezca indefinidamente
+    if (playerPositions.length > 100) {
+        playerPositions.shift();
     }
 
     renderer.render(scene, camera);
@@ -390,4 +416,12 @@ function playerMovement() {
     }
 }
 
-renderer.setAnimationLoop(game);
+// Ajustar el intervalo de almacenamiento de posición al bucle de animación
+function animate() {
+    setTimeout(function() {
+        renderer.setAnimationLoop(animate);
+        game();
+    }, timeInterval);
+}
+
+animate(); // Iniciar el bucle de animación
