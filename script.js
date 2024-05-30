@@ -53,7 +53,6 @@ const floorTexture = 'assets/floorTexture.png';
 const floorGeometry = new THREE.PlaneGeometry(250, 250);
 const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xFFFFFF });
 const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-console.log(floor.position);
 floor.rotateX(-0.5 * Math.PI);
 scene.add(floor);
 
@@ -369,9 +368,6 @@ function copyPlayerState() {
     if (playerPositions.length > 0 && playerRotations.length > 0) {
         const oldPosition = playerPositions.shift(); // Obtener la posición de hace 10 segundos
         const oldRotation = playerRotations.shift(); // Obtener la rotación de hace 10 segundos
-
-        console.log('Posición de hace 10 segundos:', oldPosition);
-        console.log('Rotación de hace 10 segundos:', oldRotation);
 
         // Asignar la posición y rotación antigua del jugador al enemigo
         if (enemy) {
