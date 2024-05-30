@@ -505,47 +505,7 @@ function playerMovement() {
         player.position.x += moveSpeed;
         player.rotation.y = Math.PI / 2;
     }
-    if (keysPressed['i']) {
-        puerta.position.z -= moveSpeed;
-    }
-    if (keysPressed['k']) {
-        puerta.position.z += moveSpeed;
-    }
-    if (keysPressed['j']) {
-        puerta.position.x -= moveSpeed;
-    }
-    if (keysPressed['l']) {
-        puerta.position.x += moveSpeed;
-    }
-    if (keysPressed['9']) {
-        puerta.rotation.y = 0;
-    }
-    if (keysPressed['0']) {
-        puerta.rotation.y = Math.PI / 2;
-    }
-    if (keysPressed['7']) {
-        scaleMultiplier -= 0.01;
-        puerta.scale.set(
-            initialScale.x * scaleMultiplier,
-            initialScale.y * scaleMultiplier,
-            initialScale.z * scaleMultiplier
-        );
-    }
-    if (keysPressed['8']) {
-        scaleMultiplier += 0.01;
-        puerta.scale.set(
-            initialScale.x * scaleMultiplier,
-            initialScale.y * scaleMultiplier,
-            initialScale.z * scaleMultiplier
-        );
-    }
-    if (keysPressed['-']) {
-        console.log('pos');
-        console.log(puerta.position);
-        console.log('sca');
-        console.log(puerta.scale);
-    }
-
+    
     if (checkMazeCollision(player, maze)) {
         player.position.copy(oldPosition);
         player.rotation.copy(oldRotation);
