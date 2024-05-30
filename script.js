@@ -527,7 +527,6 @@ function game() {
                 lowerDoor(entry.puerta);
             }
          });
-
     }
 
     renderer.render(scene, camera);
@@ -565,6 +564,13 @@ function playerMovement() {
         player.position.copy(oldPosition);
         player.rotation.copy(oldRotation);
     }
+
+    puertas.forEach((entry) => {
+       if (checkCollision(player, entry.puerta)) {
+        player.position.copy(oldPosition);
+        player.rotation.copy(oldRotation);
+       };
+     });
 }
 
 // Ajustar el intervalo de almacenamiento de posición al bucle de animación
