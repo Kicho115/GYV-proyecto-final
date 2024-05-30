@@ -202,27 +202,43 @@ loader.load(
 
 // Puerta
 let puerta;
+let initialScale = new THREE.Vector3(10, 10, 10);
 const puertaUrl = './assets/puerta.obj';
 loader.load(
     puertaUrl,
     (object) => {
-        puerta = object;
-        puerta.scale.set(10, 10, 10);
+        const boundingBox = new THREE.Box3().setFromObject(object);
+        const center = new THREE.Vector3();
+        boundingBox.getCenter(center);
 
+        // Mover la puerta para que su centro esté en el origen
+        object.position.sub(center);
+
+        // Crear un contenedor para la puerta
+        const puertaContainer = new THREE.Object3D();
+        puertaContainer.add(object);
+
+        // Configurar la escala y posición del contenedor
+        puertaContainer.scale.copy(initialScale);
+        puertaContainer.position.set(playerStartPosition.x + 10, playerStartPosition.y, playerStartPosition.z);
+
+        // Aplicar el material a cada malla de la puerta
         const puertaMaterial = new THREE.MeshLambertMaterial({
             map: mazeTexture,
             color: 0xE23131,
         });
-        puerta.traverse((child) => {
+        object.traverse((child) => {
             if (child.isMesh) {
                 child.material = puertaMaterial;
             }
         });
 
-        // Configurar la posición inicial de la puerta cerca del jugador
-        puerta.position.set(playerStartPosition.x + 10, playerStartPosition.y, playerStartPosition.z);
+        // Guardar referencia a la puerta
+        puerta = puertaContainer;
 
-        scene.add(puerta);
+        // Añadir el contenedor a la escena
+        scene.add(puertaContainer);
+
     },
     (xhr) => {
         console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
@@ -440,6 +456,8 @@ function game() {
     renderer.render(scene, camera);
 }
 
+let scaleMultiplier = 1;
+
 // Player movement function
 function playerMovement() {
     const oldPosition = player.position.clone();
@@ -460,6 +478,44 @@ function playerMovement() {
     if (keysPressed['d']) {
         player.position.x += moveSpeed;
         player.rotation.y = Math.PI / 2;
+    }
+    if (keysPressed['i']) {
+        puerta.position.z -= moveSpeed;
+    }
+    if (keysPressed['k']) {
+        puerta.position.z += moveSpeed;
+    }
+    if (keysPressed['j']) {
+        puerta.position.x -= moveSpeed;
+    }
+    if (keysPressed['l']) {
+        puerta.position.x += moveSpeed;
+    }
+    if (keysPressed['9']) {
+        puerta.rotation.y = 0;
+    }
+    if (keysPressed['0']) {
+        puerta.rotation.y = Math.PI / 2;
+    }
+    if (keysPressed['7']) {
+        scaleMultiplier -= 0.01;
+        puerta.scale.set(
+            initialScale.x * scaleMultiplier,
+            initialScale.y * scaleMultiplier,
+            initialScale.z * scaleMultiplier
+        );
+    }
+    if (keysPressed['8']) {
+        scaleMultiplier += 0.01;
+        puerta.scale.set(
+            initialScale.x * scaleMultiplier,
+            initialScale.y * scaleMultiplier,
+            initialScale.z * scaleMultiplier
+        );
+    }
+    if (keysPressed['-']) {
+        console.log('Position' + puerta.position);
+        console.log('Scale' + puerta.scale);
     }
 
     if (checkMazeCollision(player, maze)) {
