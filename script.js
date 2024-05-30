@@ -201,6 +201,39 @@ loader.load(
     }
 );
 
+// Puerta
+let puerta;
+const puertaUrl = './assets/puerta.obj';
+loader.load(
+    puertaUrl,
+    (object) => {
+        puerta = object;
+        puerta.scale.set(10, 10, 10);
+
+        const puertaMaterial = new THREE.MeshLambertMaterial({
+            map: mazeTexture,
+            color: 0xE23131,
+        });
+        puerta.traverse((child) => {
+            if (child.isMesh) {
+                child.material = puertaMaterial;
+            }
+        });
+
+        // Configurar la posición inicial de la puerta cerca del jugador
+        puerta.position.set(playerStartPosition.x + 10, playerStartPosition.y, playerStartPosition.z);
+
+        scene.add(puerta);
+    },
+    (xhr) => {
+        console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
+    },
+    (error) => {
+        console.error('Error loading puerta:', error);
+    }
+);
+
+
 // Movement variables
 const moveSpeed = 0.1;
 const enemySpeed = 0.05;
