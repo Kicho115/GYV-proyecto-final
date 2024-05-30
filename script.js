@@ -174,6 +174,7 @@ loader.load(
 
         // Mover el laberinto para que su centro esté en el origen
         maze.position.sub(mazeCenter);
+        maze.position.y = 2;
 
         scene.add(maze);
     },
