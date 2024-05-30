@@ -514,8 +514,10 @@ function playerMovement() {
         );
     }
     if (keysPressed['-']) {
-        console.log('Position' + puerta.position);
-        console.log('Scale' + puerta.scale);
+        console.log('pos');
+        console.log(puerta.position);
+        console.log('sca');
+        console.log(puerta.scale);
     }
 
     if (checkMazeCollision(player, maze)) {
