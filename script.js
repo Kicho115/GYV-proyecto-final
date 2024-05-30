@@ -4,6 +4,8 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import * as dat from 'dat.gui';
 import { GLTFLoader } from 'three/examples/jsm/Addons.js';
 
+
+
 // TODO: borrar hitboxes
 let playerHelper;
 
@@ -248,6 +250,20 @@ loader.load(
     }
 );
 
+// Música
+const listener = new THREE.AudioListener();
+camera.add(listener);
+
+const sound = new THREE.Audio(listener);
+
+const audioLoader = new THREE.AudioLoader();
+audioLoader.load('./assets/musicafondo.mp3', function (buffer) {
+    sound.setBuffer(buffer);
+    sound.setLoop(true);
+    sound.setVolume(0.5);
+});
+
+let musicaFondoTocando = false;
 
 // Movement variables
 const moveSpeed = 0.1;
@@ -332,6 +348,8 @@ function resetGame() {
     titleScreen.style.display = 'block';
     updateHighScores(score);
     displayHighScores();
+    sound.stop();
+    musicaFondoTocando = false;
 }
 
 // Update high scores
@@ -399,6 +417,11 @@ function game() {
     if (!gameStarted) {
         renderer.render(scene, camera);
         return;
+    }
+
+    if (!musicaFondoTocando) {
+        sound.play();
+        musicaFondoTocando = true;
     }
 
     playerMovement();
