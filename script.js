@@ -28,7 +28,7 @@ const axesHelper = new THREE.AxesHelper(50);
 scene.add(axesHelper);
 
 const ambientLight = new THREE.AmbientLight(0xFFFFFF, 1);
-scene.add(ambientLight);
+//scene.add(ambientLight);
 
 // Camera
 const camera = new THREE.PerspectiveCamera(
@@ -119,7 +119,7 @@ assetLoader.load(
     (object) => {
         player = object.scene;
         player.scale.set(0.125, 0.125, 0.125);
-        const blackMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
+        const blackMaterial = new THREE.MeshStandardMaterial({ color: 0x18110e });
         player.traverse((child) => {
             if (child.isMesh) {
                 child.material = blackMaterial;
@@ -152,6 +152,12 @@ assetLoader.load(enemyUrl.href, function (gltf) {
     enemy = gltf.scene;
     enemy.position.copy(enemyStartPosition);
     enemy.scale.multiplyScalar(0.18);
+    const enemyMaterial = new THREE.MeshStandardMaterial({ color: 0xff3c00 });
+    enemy.traverse((child) => {
+        if (child.isMesh) {
+            child.material = enemyMaterial;
+        }
+    });
     scene.add(enemy);
     mixer = new THREE.AnimationMixer(enemy);
     const enemyAnimation = THREE.AnimationClip.findByName(gltf.animations, 'Correr');
