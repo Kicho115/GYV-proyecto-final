@@ -46,6 +46,7 @@ const raycaster = new THREE.Raycaster();
 
 // Animations
 let mixer;
+let playerMixer;
 const clock = new THREE.Clock();
 
 // Floor
@@ -108,14 +109,15 @@ gui.add(options, 'targetZ', -50, 50).onChange(function (e) {
 })
 
 // Player
+const assetLoader = new GLTFLoader();
 let player;
 const playerStartPosition = new THREE.Vector3(5, 1, 110);
-const playerUrl = './assets/player.obj';
+const playerUrl = new URL('assets/Minotauro4.0.glb', import.meta.url);
 const loader = new OBJLoader();
-loader.load(
-    playerUrl,
+assetLoader.load(
+    playerUrl.href,
     (object) => {
-        player = object;
+        player = object.scene;
         player.scale.set(0.125, 0.125, 0.125);
         const blackMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
         player.traverse((child) => {
@@ -128,6 +130,10 @@ loader.load(
         playerHelper = new THREE.BoxHelper(player, 0xff0000); // Color rojo para la hitbox
         scene.add(playerHelper);
         scene.add(player);
+        playerMixer = new THREE.AnimationMixer(player);
+        const playerAnimation = THREE.AnimationClip.findByName(object.animations, 'ArmatureAction');
+        const playerAction = playerMixer.clipAction(playerAnimation);
+        playerAction.play();
     },
     (xhr) => {
         console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
@@ -138,7 +144,6 @@ loader.load(
 );
 
 // Enemy
-const assetLoader = new GLTFLoader();
 let enemy;
 const enemyStartPosition = new THREE.Vector3(5, 1, 150);
 const enemyUrl = new URL('assets/enemy.glb', import.meta.url);
@@ -490,18 +495,22 @@ function playerMovement() {
     if (keysPressed['w']) {
         player.position.z -= moveSpeed;
         player.rotation.y = Math.PI;
+        playerMixer.update(clock.getDelta());
     }
     if (keysPressed['s']) {
         player.position.z += moveSpeed;
         player.rotation.y = 0;
+        playerMixer.update(clock.getDelta());
     }
     if (keysPressed['a']) {
         player.position.x -= moveSpeed;
         player.rotation.y = -Math.PI / 2;
+        playerMixer.update(clock.getDelta());
     }
     if (keysPressed['d']) {
         player.position.x += moveSpeed;
         player.rotation.y = Math.PI / 2;
+        playerMixer.update(clock.getDelta());
     }
     if (keysPressed['i']) {
         puerta.position.z -= moveSpeed;
