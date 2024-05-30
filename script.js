@@ -42,6 +42,10 @@ const orbitControls = new OrbitControls(camera, renderer.domElement);
 // Raycaster
 const raycaster = new THREE.Raycaster();
 
+// Animations
+let mixer;
+const clock = new THREE.Clock();
+
 // Floor
 const textureLoader = new THREE.TextureLoader();
 const floorTexture = 'assets/floorTexture.png';
@@ -142,6 +146,10 @@ assetLoader.load(enemyUrl.href, function (gltf) {
     enemy.position.copy(enemyStartPosition);
     enemy.scale.multiplyScalar(0.25);
     scene.add(enemy);
+    mixer = new THREE.AnimationMixer(enemy);
+    const enemyAnimation = THREE.AnimationClip.findByName(gltf.animations, 'Correr');
+    const enemyAction = mixer.clipAction(enemyAnimation);
+    enemyAction.play();
 }, undefined, function (error) {
     console.error(error);
 })
@@ -324,12 +332,6 @@ function isObjectIluminated(object, spotLight) {
     }
 };
 
-// Animations
-let mixer;
-
-
-
-
 // Almacenar las posiciones del jugador
 const playerPositions = [];
 const playerRotations = [];
@@ -348,6 +350,7 @@ function copyPlayerState() {
         if (enemy) {
             enemy.position.copy(oldPosition);
             enemy.rotation.copy(oldRotation);
+            mixer.update(clock.getDelta());
         }
     }
 }
