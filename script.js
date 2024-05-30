@@ -144,7 +144,7 @@ const enemyUrl = new URL('assets/enemy.glb', import.meta.url);
 assetLoader.load(enemyUrl.href, function (gltf) {
     enemy = gltf.scene;
     enemy.position.copy(enemyStartPosition);
-    enemy.scale.multiplyScalar(0.25);
+    enemy.scale.multiplyScalar(0.18);
     scene.add(enemy);
     mixer = new THREE.AnimationMixer(enemy);
     const enemyAnimation = THREE.AnimationClip.findByName(gltf.animations, 'Correr');
