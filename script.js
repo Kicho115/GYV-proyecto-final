@@ -24,7 +24,7 @@ const scene = new THREE.Scene();
 const axesHelper = new THREE.AxesHelper(50);
 scene.add(axesHelper);
 
-const ambientLight = new THREE.AmbientLight(0xFFFFFF, 100);
+const ambientLight = new THREE.AmbientLight(0xFFFFFF, 1);
 scene.add(ambientLight);
 
 // Camera
@@ -39,6 +39,9 @@ camera.position.set(0, 10, 5);
 const orbitControls = new OrbitControls(camera, renderer.domElement);
 
 // Floor
+const textureLoader = new THREE.TextureLoader();
+const floorTexture = 'assets/floorTexture.png';
+
 const floorGeometry = new THREE.PlaneGeometry(250, 250);
 const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xFFFFFF });
 const floor = new THREE.Mesh(floorGeometry, floorMaterial);
@@ -131,6 +134,15 @@ const enemy = new THREE.Mesh(enemyGeometry, enemyMaterial);
 enemy.position.set(5, 0.25, 5);
 scene.add(enemy);
 
+// Maze texture settings
+const mazeTextureUrl = floorTexture;
+const mazeTexture = textureLoader.load(mazeTextureUrl, (texture) => {
+    // Configurar filtros de textura para mejorar la calidad
+    texture.minFilter = THREE.LinearMipMapLinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+});
+
 // Maze
 let maze;
 const mazeUrl = './images/dedalo.obj';
@@ -139,12 +151,17 @@ loader.load(
     (object) => {
         maze = object;
         maze.scale.set(10, 10, 10);
-        const blackMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
+
+        const blackMaterial = new THREE.MeshLambertMaterial({ 
+            map: mazeTexture, 
+            color: 0x333333
+        });
         maze.traverse((child) => {
             if (child.isMesh) {
                 child.material = blackMaterial;
             }
         });
+
         // Calcular el centro del bounding box del laberinto
         const mazeBoundingBox = new THREE.Box3().setFromObject(maze);
         const mazeCenter = new THREE.Vector3();
