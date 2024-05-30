@@ -73,6 +73,7 @@ const gui = new dat.GUI();
 const options = {
     ModoExplorar: true,
     targetX: 0,
+    targetY: 0,
     targetZ: 0,
     angle: 0.2,
     penumbra: 0,
@@ -100,6 +101,11 @@ gui.add(options, 'intensity', 0, 100).onChange(function (e) {
 gui.add(options, 'targetX', -50, 50).onChange(function (e) {
     spotLight.target.position.x = e;
     spotLightHelper.update();
+});
+
+gui.add(options, 'targetY', -50, 50).onChange(function (e) {
+        spotLight.target.position.y = e;
+        spotLightHelper.update();
 });
 
 gui.add(options, 'targetZ', -50, 50).onChange(function (e) {
