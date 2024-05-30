@@ -332,18 +332,22 @@ let mixer;
 
 // Almacenar las posiciones del jugador
 const playerPositions = [];
+const playerRotations = [];
 const timeInterval = 100; // Intervalo de tiempo en ms para almacenar la posición del jugador
 let elapsedTime = 0;
 
-// Función para copiar la posición del jugador después de 10 segundos
-function copyPlayerPosition() {
-    if (playerPositions.length > 0) {
+function copyPlayerState() {
+    if (playerPositions.length > 0 && playerRotations.length > 0) {
         const oldPosition = playerPositions.shift(); // Obtener la posición de hace 10 segundos
-        console.log('Posición de hace 10 segundos:', oldPosition);
+        const oldRotation = playerRotations.shift(); // Obtener la rotación de hace 10 segundos
 
-        // Asignar la posición antigua del jugador al enemigo
+        console.log('Posición de hace 10 segundos:', oldPosition);
+        console.log('Rotación de hace 10 segundos:', oldRotation);
+
+        // Asignar la posición y rotación antigua del jugador al enemigo
         if (enemy) {
             enemy.position.copy(oldPosition);
+            enemy.rotation.copy(oldRotation);
         }
     }
 }
@@ -390,17 +394,21 @@ function game() {
 
     // Almacenar la posición del jugador cada intervalo de tiempo
     if (elapsedTime >= 10000) {
-        copyPlayerPosition();
+        copyPlayerState();
     }else {
         elapsedTime += timeInterval;
     }
 
     // Almacenar la posición actual del jugador
     playerPositions.push(player.position.clone());
+    playerRotations.push(player.rotation.clone());
 
     // Limitar el tamaño del array dewa posiciones para que no crezca indefinidamente
     if (playerPositions.length > 100) {
         playerPositions.shift();
+    }
+    if (playerRotations.length > 100) {
+        playerRotations.shift();
     }
 
     renderer.render(scene, camera);
@@ -409,6 +417,7 @@ function game() {
 // Player movement function
 function playerMovement() {
     const oldPosition = player.position.clone();
+    const oldRotation = player.rotation.clone();
 
     if (keysPressed['w']) {
         player.position.z -= moveSpeed;
@@ -429,6 +438,7 @@ function playerMovement() {
 
     if (checkMazeCollision(player, maze)) {
         player.position.copy(oldPosition);
+        player.rotation.copy(oldRotation);
     }
 }
 
