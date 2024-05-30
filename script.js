@@ -563,6 +563,14 @@ function playerMovement() {
         player.rotation.y = Math.PI / 2;
         playerMixer.update(clock.getDelta());
     }
+    if (keysPressed['f']) {
+        if (options.ModoExplorar) {
+            options.ModoExplorar = false;
+        } else {
+            options.ModoExplorar = true;
+        }
+
+    }
     
     if (checkMazeCollision(player, maze)) {
         player.position.copy(oldPosition);
