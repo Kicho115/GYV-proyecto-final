@@ -251,20 +251,20 @@ loader.load(
     }
 );
 
-// // Música
-// const listener = new THREE.AudioListener();
-// camera.add(listener);
+// Música
+const listener = new THREE.AudioListener();
+camera.add(listener);
 
-// const sound = new THREE.Audio(listener);
+const sound = new THREE.Audio(listener);
 
-// const audioLoader = new THREE.AudioLoader();
-// audioLoader.load('./assets/musicafondo.mp3', function (buffer) {
-//     sound.setBuffer(buffer);
-//     sound.setLoop(true);
-//     sound.setVolume(0.5);
-// });
+const audioLoader = new THREE.AudioLoader();
+audioLoader.load('./assets/musicafondo.mp3', function (buffer) {
+    sound.setBuffer(buffer);
+    sound.setLoop(true);
+    sound.setVolume(0.5);
+});
 
-// let musicaFondoTocando = false;
+let musicaFondoTocando = false;
 
 // Movement variables
 const moveSpeed = 0.1;
@@ -420,10 +420,10 @@ function game() {
         return;
     }
 
-    // if (!musicaFondoTocando) {
-    //     sound.play();
-    //     musicaFondoTocando = true;
-    // }
+    if (!musicaFondoTocando) {
+        sound.play();
+        musicaFondoTocando = true;
+    }
 
     playerMovement();
 
