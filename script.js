@@ -38,6 +38,9 @@ camera.position.set(0, 10, 5);
 
 const orbitControls = new OrbitControls(camera, renderer.domElement);
 
+// Raycaster
+const raycaster = new THREE.Raycaster();
+
 // Floor
 const textureLoader = new THREE.TextureLoader();
 const floorTexture = 'assets/floorTexture.png';
@@ -291,6 +294,22 @@ function displayHighScores() {
 
 // Initialize high scores on load
 displayHighScores();
+
+// Check if the light is touching an object
+function isObjectIluminated(object, spotLight) {
+    const direction = new THREE.Vector3();
+    direction.subVectors(object.position, spotlight.position).normalize();
+
+    raycaster.set(spotlight.position, direction);
+
+    const intersects = raycaster.intersectObject(object);
+    console.log(intersects);
+
+    if (intersects.length > 0) {
+        const distance = intersects[0].distance;
+        // do smth here
+    }
+}
 
 // Game loop
 function game() {
