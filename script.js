@@ -23,7 +23,7 @@ window.addEventListener('resize', () => {
 // Scene
 const scene = new THREE.Scene();
 const axesHelper = new THREE.AxesHelper(50);
-scene.add(axesHelper);
+//scene.add(axesHelper);
 
 const ambientLight = new THREE.AmbientLight(0xFFFFFF, 1);
 scene.add(ambientLight);
@@ -62,6 +62,7 @@ scene.add(floor);
 const spotLight = new THREE.SpotLight(0xFFFFFF, 100);
 spotLight.position.set(-3, 5, 0);
 spotLight.castShadow = true;
+spotLight.angle = 0.2;
 scene.add(spotLight);
 
 const spotLightHelper = new THREE.SpotLightHelper(spotLight);
@@ -98,17 +99,17 @@ gui.add(options, 'intensity', 0, 100).onChange(function (e) {
     spotLight.intensity = e;
 });
 
-gui.add(options, 'targetX', -50, 50).onChange(function (e) {
+gui.add(options, 'targetX', -180, 180).onChange(function (e) {
     spotLight.target.position.x = e;
     spotLightHelper.update();
 });
 
-gui.add(options, 'targetY', -50, 50).onChange(function (e) {
+gui.add(options, 'targetY', -180, 180).onChange(function (e) {
         spotLight.target.position.y = e;
         spotLightHelper.update();
 });
 
-gui.add(options, 'targetZ', -50, 50).onChange(function (e) {
+gui.add(options, 'targetZ', -180, 180).onChange(function (e) {
     spotLight.target.position.z = e;
     spotLightHelper.update();
 })
@@ -133,7 +134,7 @@ assetLoader.load(
         // Make the player spawn at the start of the maze
         player.position.copy(playerStartPosition);
         playerHelper = new THREE.BoxHelper(player, 0xff0000); // Color rojo para la hitbox
-        scene.add(playerHelper);
+        //scene.add(playerHelper);
         scene.add(player);
         playerMixer = new THREE.AnimationMixer(player);
         const playerAnimation = THREE.AnimationClip.findByName(object.animations, 'ArmatureAction');
@@ -260,7 +261,7 @@ loader.load(
             const lightDetectorGeometry = new THREE.BoxGeometry(1, 1, 1);
             const lightDetectorMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
             const lightDetector = new THREE.Mesh(lightDetectorGeometry, lightDetectorMaterial);
-            lightDetector.position.set(doorPositions[i][0], doorPositions[i][1] + 2, doorPositions[i][2] - 5); // Ajustar según sea necesario
+            lightDetector.position.set(doorPositions[i][0], doorPositions[i][1] + 2, doorPositions[i][2] + 5); // Ajustar según sea necesario
             lightDetector.userData.doorIndex = i; // Asociar detector con puerta
             scene.add(lightDetector);
 
@@ -282,7 +283,7 @@ const lightDetectorMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 }
 const lightDetector = new THREE.Mesh(lightDetectorGeometry, lightDetectorMaterial);
 lightDetector.position.copy(playerStartPosition); // Position it above the ground
 lightDetector.position.z -= 4 
-scene.add(lightDetector);
+//scene.add(lightDetector);
 
 // Música
 const listener = new THREE.AudioListener();
@@ -459,8 +460,6 @@ function game() {
         return;
     }
 
-    const delta = clock.getDelta();
-
     if (!musicaFondoTocando) {
         sound.play();
         musicaFondoTocando = true;
@@ -476,9 +475,9 @@ function game() {
     }
 
     // Check collision with enemy
-    /*if (checkCollision(player, enemy)) {
+    if (checkCollision(player, enemy)) {
         resetGame();
-    }*/
+    }
 
     // Spotlight following the player
     spotLight.position.set(player.position.x, player.position.y + 2, player.position.z);
@@ -500,7 +499,7 @@ function game() {
     }
 
     // Almacenar la posición del jugador cada intervalo de tiempo
-    if (elapsedTime >= 10000) {
+    if (elapsedTime >= 25000) {
         copyPlayerState();
     }else {
         elapsedTime += timeInterval;
@@ -517,34 +516,17 @@ function game() {
     if (playerRotations.length > 100) {
         playerRotations.shift();
     }
-
-    if (options.ModoExplorar) {
-        const step = delta * 5;
-        const direction = new THREE.Vector3(options.targetX, 0, options.targetZ);
-        const distance = direction.length();
-
+    
+    const lightDirection = new THREE.Vector3().subVectors(spotLight.target.position, spotLight.position).normalize();
+    if (!options.ModoExplorar) {
         // Revisar detectores de luz
         // Detección de luz en detectores en las paredes
-        puertas.forEach((entry) => {
-            const detector = entry.detector; // Obtenemos el detector de luz de la entrada actual
-            const direction = new THREE.Vector3(); // Creamos un vector para la dirección
-            const lightPosition = spotLight.position.clone(); // Obtenemos la posición de la luz
-
-            // Calculamos la dirección desde el detector hacia la luz
-            direction.subVectors(lightPosition, detector.position).normalize();
-
-            // Configuramos el rayo con la posición del detector y la dirección hacia la luz
-            raycaster.set(detector.position, direction);
-
-            // Realizamos la intersección con la luz
-            const intersects = raycaster.intersectObject(lightDetector);
-            
-            // Si hay intersección, significa que la luz está alcanzando el detector
-            if (intersects.length > 0) {
-                console.log(intersects)
-                lowerDoor(entry.puerta); // Si la luz alcanza el detector, bajamos la puerta asociada
+         puertas.forEach((entry) => {
+            const detectorDirection = new THREE.Vector3().subVectors(entry.puerta.position, spotLight.position).normalize();
+            if (lightDirection.dot(detectorDirection) > 0.90) {
+                lowerDoor(entry.puerta);
             }
-        });
+         });
 
     }
 
