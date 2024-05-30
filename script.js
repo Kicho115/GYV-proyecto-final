@@ -133,6 +133,7 @@ assetLoader.load(
         playerMixer = new THREE.AnimationMixer(player);
         const playerAnimation = THREE.AnimationClip.findByName(object.animations, 'ArmatureAction');
         const playerAction = playerMixer.clipAction(playerAnimation);
+        playerAction.timeScale = 4;
         playerAction.play();
     },
     (xhr) => {
