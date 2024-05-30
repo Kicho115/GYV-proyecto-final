@@ -103,6 +103,7 @@ gui.add(options, 'targetZ', -50, 50).onChange(function (e) {
 
 // Player
 let player;
+const playerStartPosition = new THREE.Vector3(5, 1, 110);
 const playerUrl = './assets/player.obj';
 const loader = new OBJLoader();
 loader.load(
@@ -117,7 +118,7 @@ loader.load(
             }
         });
         // Make the player spawn at the start of the maze
-        player.position.set(5, 1, 110);
+        player.position.copy(playerStartPosition);
         playerHelper = new THREE.BoxHelper(player, 0xff0000); // Color rojo para la hitbox
         scene.add(playerHelper);
         scene.add(player);
@@ -134,7 +135,8 @@ loader.load(
 const enemyGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 const enemyMaterial = new THREE.MeshStandardMaterial({ color: 0xFF0000 });
 const enemy = new THREE.Mesh(enemyGeometry, enemyMaterial);
-enemy.position.set(5, 0.25, 5);
+const enemyStartPosition = new THREE.Vector3(5, 0.25, 5);
+enemy.position.copy(enemyStartPosition);
 scene.add(enemy);
 
 // Maze texture settings
@@ -194,7 +196,7 @@ let currentColorIndex = 0;
 
 // Scoring variables
 let score = 0;
-let highScores = JSON.parse(localStorage.getItem('highScores')) || [];
+let highScores = [];
 const scoreText = document.createElement('div');
 scoreText.style.position = 'absolute';
 scoreText.style.top = '10px';
@@ -239,14 +241,14 @@ function checkCollision(obj1, obj2) {
 }
 
 // Function to check collision with maze walls
-function checkMazeCollision(player, maze) {
-    const playerBox = new THREE.Box3().setFromObject(player);
+function checkMazeCollision(object, maze) {
+    const objectBox = new THREE.Box3().setFromObject(object);
     let collision = false;
 
     maze.traverse((child) => {
         if (child.isMesh) {
             const wallBox = new THREE.Box3().setFromObject(child);
-            if (playerBox.intersectsBox(wallBox)) {
+            if (objectBox.intersectsBox(wallBox)) {
                 collision = true;
             }
         }
@@ -266,8 +268,8 @@ function calculateScore() {
 
 // Reset game function
 function resetGame() {
-    player.position.set(0, 0.25, 0);
-    enemy.position.set(5, 0.25, 5);
+    player.position.copy(playerStartPosition);
+    enemy.position.copy(enemyStartPosition);
     gameStarted = false;
     titleScreen.style.display = 'block';
     updateHighScores(score);
@@ -293,7 +295,10 @@ function displayHighScores() {
 }
 
 // Initialize high scores on load
-displayHighScores();
+window.addEventListener('load', () => {
+    highScores = [];
+    localStorage.removeItem('highScores');
+});
 
 // Check if the light is touching an object
 function isObjectIluminated(object, spotLight) {
@@ -321,14 +326,20 @@ function game() {
     playerMovement();
 
     // Enemy movement
+    const oldEnemyPosition = enemy.position.clone();
     const direction = new THREE.Vector3();
     direction.subVectors(player.position, enemy.position).normalize();
     enemy.position.add(direction.multiplyScalar(enemySpeed));
 
+    // Check enemy collision with maze walls
+    if (checkMazeCollision(enemy, maze)) {
+        enemy.position.copy(oldEnemyPosition);
+    }
+
     // Check collision with enemy
-    /*if (checkCollision(player, enemy)) {
+    if (checkCollision(player, enemy)) {
         resetGame();
-    }*/
+    }
 
     // Spotlight following the player
     spotLight.position.set(player.position.x, player.position.y + 2, player.position.z);
