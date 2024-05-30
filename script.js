@@ -4,8 +4,6 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import * as dat from 'dat.gui';
 import { GLTFLoader } from 'three/examples/jsm/Addons.js';
 
-
-
 // TODO: borrar hitboxes
 let playerHelper;
 
@@ -28,7 +26,7 @@ const axesHelper = new THREE.AxesHelper(50);
 scene.add(axesHelper);
 
 const ambientLight = new THREE.AmbientLight(0xFFFFFF, 1);
-//scene.add(ambientLight);
+scene.add(ambientLight);
 
 // Camera
 const camera = new THREE.PerspectiveCamera(
@@ -43,6 +41,7 @@ const orbitControls = new OrbitControls(camera, renderer.domElement);
 
 // Raycaster
 const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
 
 // Animations
 let mixer;
@@ -249,12 +248,18 @@ loader.load(
             // Configurar la escala y posición del contenedor
             puertaContainer.scale.copy(initialScale);
             puertaContainer.position.set(doorPositions[i][0], doorPositions[i][1], doorPositions[i][2]);
-
-            // Añadir el contenedor al array de puertas
-            puertas.push(puertaContainer);
-
-            // Añadir el contenedor a la escena
             scene.add(puertaContainer);
+
+            // Crear y posicionar el detector de luz
+            const lightDetectorGeometry = new THREE.BoxGeometry(1, 1, 1);
+            const lightDetectorMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+            const lightDetector = new THREE.Mesh(lightDetectorGeometry, lightDetectorMaterial);
+            lightDetector.position.set(doorPositions[i][0], doorPositions[i][1] + 2, doorPositions[i][2] - 5); // Ajustar según sea necesario
+            lightDetector.userData.doorIndex = i; // Asociar detector con puerta
+            scene.add(lightDetector);
+
+            // Añadir la puerta y su detector al arreglo puertas
+            puertas.push({ puerta: puertaContainer, detector: lightDetector });
         }
     },
     (xhr) => {
@@ -264,6 +269,14 @@ loader.load(
         console.error('Error loading puerta:', error);
     }
 );
+
+// lightDetector
+const lightDetectorGeometry = new THREE.BoxGeometry(1, 1, 1);
+const lightDetectorMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+const lightDetector = new THREE.Mesh(lightDetectorGeometry, lightDetectorMaterial);
+lightDetector.position.copy(playerStartPosition); // Position it above the ground
+lightDetector.position.z -= 4 
+scene.add(lightDetector);
 
 // Música
 const listener = new THREE.AudioListener();
@@ -427,12 +440,20 @@ function copyPlayerState() {
     }
 }
 
+function lowerDoor(door) {
+    if (door.position.y > -10) {
+        door.position.y -= 0.1;
+    }
+}
+
 // Game loop
 function game() {
     if (!gameStarted) {
         renderer.render(scene, camera);
         return;
     }
+
+    const delta = clock.getDelta();
 
     if (!musicaFondoTocando) {
         sound.play();
@@ -489,6 +510,36 @@ function game() {
     }
     if (playerRotations.length > 100) {
         playerRotations.shift();
+    }
+
+    if (options.ModoExplorar) {
+        const step = delta * 5;
+        const direction = new THREE.Vector3(options.targetX, 0, options.targetZ);
+        const distance = direction.length();
+
+        // Revisar detectores de luz
+        // Detección de luz en detectores en las paredes
+        puertas.forEach((entry) => {
+            const detector = entry.detector; // Obtenemos el detector de luz de la entrada actual
+            const direction = new THREE.Vector3(); // Creamos un vector para la dirección
+            const lightPosition = spotLight.position.clone(); // Obtenemos la posición de la luz
+
+            // Calculamos la dirección desde el detector hacia la luz
+            direction.subVectors(lightPosition, detector.position).normalize();
+
+            // Configuramos el rayo con la posición del detector y la dirección hacia la luz
+            raycaster.set(detector.position, direction);
+
+            // Realizamos la intersección con la luz
+            const intersects = raycaster.intersectObject(lightDetector);
+            
+            // Si hay intersección, significa que la luz está alcanzando el detector
+            if (intersects.length > 0) {
+                console.log(intersects)
+                lowerDoor(entry.puerta); // Si la luz alcanza el detector, bajamos la puerta asociada
+            }
+        });
+
     }
 
     renderer.render(scene, camera);
