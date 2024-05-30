@@ -204,6 +204,7 @@ loader.load(
 
 // Puerta
 let puerta;
+let doorPositions = [[6.2, 1, 101.8], [-40.6, 1, 96.2], [-65.8, 1, 89.3], [-16.5, 1, 81], [18.6, 1, 25, 4], [95.4, 1, 20.3], [61.1, 1, -36.9], [-5.3, 1, -101.9]];
 let initialScale = new THREE.Vector3(10, 10, 10);
 const puertaUrl = './assets/puerta.obj';
 loader.load(
@@ -250,20 +251,20 @@ loader.load(
     }
 );
 
-// Música
-const listener = new THREE.AudioListener();
-camera.add(listener);
+// // Música
+// const listener = new THREE.AudioListener();
+// camera.add(listener);
 
-const sound = new THREE.Audio(listener);
+// const sound = new THREE.Audio(listener);
 
-const audioLoader = new THREE.AudioLoader();
-audioLoader.load('./assets/musicafondo.mp3', function (buffer) {
-    sound.setBuffer(buffer);
-    sound.setLoop(true);
-    sound.setVolume(0.5);
-});
+// const audioLoader = new THREE.AudioLoader();
+// audioLoader.load('./assets/musicafondo.mp3', function (buffer) {
+//     sound.setBuffer(buffer);
+//     sound.setLoop(true);
+//     sound.setVolume(0.5);
+// });
 
-let musicaFondoTocando = false;
+// let musicaFondoTocando = false;
 
 // Movement variables
 const moveSpeed = 0.1;
@@ -419,10 +420,10 @@ function game() {
         return;
     }
 
-    if (!musicaFondoTocando) {
-        sound.play();
-        musicaFondoTocando = true;
-    }
+    // if (!musicaFondoTocando) {
+    //     sound.play();
+    //     musicaFondoTocando = true;
+    // }
 
     playerMovement();
 
@@ -449,9 +450,9 @@ function game() {
     calculateScore();
 
     // Update camera position to follow the player
-    camera.position.x = player.position.x;
-    camera.position.z = player.position.z + 5;
-    camera.lookAt(player.position);
+    camera.position.x = puerta.position.x;
+    camera.position.z = puerta.position.z + 5;
+    camera.lookAt(puerta.position);
 
     if (playerHelper) {
         playerHelper.update();
