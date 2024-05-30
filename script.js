@@ -206,10 +206,6 @@ const moveSpeed = 0.1;
 const enemySpeed = 0.05;
 const keysPressed = {};
 
-// Available colors
-const colors = [0x00FF00, 0xFF0000, 0x0000FF];
-let currentColorIndex = 0;
-
 // Scoring variables
 let score = 0;
 let highScores = [];
@@ -275,9 +271,7 @@ function checkMazeCollision(object, maze) {
 
 // Function to calculate score
 function calculateScore() {
-    const distance = Math.sqrt(
-        Math.pow(player.position.x, 2) + Math.pow(player.position.z, 2)
-    );
+    const distance = player.position.distanceTo(playerStartPosition);
     score = Math.floor(distance);
     scoreText.innerHTML = `Score: ${score}`;
 }
