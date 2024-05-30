@@ -25,7 +25,7 @@ const scene = new THREE.Scene();
 const axesHelper = new THREE.AxesHelper(50);
 //scene.add(axesHelper);
 
-const ambientLight = new THREE.AmbientLight(0xFFFFFF, 1);
+const ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.1);
 scene.add(ambientLight);
 
 // Camera
@@ -55,6 +55,7 @@ const floorTexture = 'assets/floorTexture.png';
 const floorGeometry = new THREE.PlaneGeometry(250, 250);
 const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xFFFFFF });
 const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+floor.castShadow = true;
 floor.rotateX(-0.5 * Math.PI);
 scene.add(floor);
 
@@ -62,7 +63,8 @@ scene.add(floor);
 const spotLight = new THREE.SpotLight(0xFFFFFF, 100);
 spotLight.position.set(-3, 5, 0);
 spotLight.castShadow = true;
-spotLight.angle = 0.2;
+spotLight.angle = 0.5;
+spotLight.penumbra = 1;
 scene.add(spotLight);
 
 const spotLightHelper = new THREE.SpotLightHelper(spotLight);
@@ -152,7 +154,7 @@ assetLoader.load(
 
 // Enemy
 let enemy;
-const enemyStartPosition = new THREE.Vector3(5, 1, 150);
+const enemyStartPosition = new THREE.Vector3(5, 1, 250);
 const enemyUrl = new URL('assets/enemy.glb', import.meta.url);
 assetLoader.load(enemyUrl.href, function (gltf) {
     enemy = gltf.scene;
@@ -164,6 +166,7 @@ assetLoader.load(enemyUrl.href, function (gltf) {
             child.material = enemyMaterial;
         }
     });
+    enemy.castShadow = true;
     scene.add(enemy);
     mixer = new THREE.AnimationMixer(enemy);
     const enemyAnimation = THREE.AnimationClip.findByName(gltf.animations, 'Correr');
@@ -483,6 +486,7 @@ function game() {
     spotLight.position.set(player.position.x, player.position.y + 2, player.position.z);
     if (options.ModoExplorar) {
         spotLight.target.position.set(player.position.x, player.position.y, player.position.z);
+        spotLight.angle = 0.5;
     }
     spotLightHelper.update();
 
