@@ -479,7 +479,7 @@ function game() {
 
     // Check collision with enemy
     if (checkCollision(player, enemy)) {
-        resetGame();
+       // resetGame();
     }
 
     // Spotlight following the player
@@ -583,6 +583,7 @@ function playerMovement() {
         player.rotation.copy(oldRotation);
        };
      });
+     
 }
 
 // Ajustar el intervalo de almacenamiento de posición al bucle de animación
