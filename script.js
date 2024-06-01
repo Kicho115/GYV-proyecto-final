@@ -526,7 +526,7 @@ function game() {
         // Revisar detectores de luz
         // Detección de luz en detectores en las paredes
          puertas.forEach((entry) => {
-            const detectorDirection = new THREE.Vector3().subVectors(entry.puerta.position, spotLight.position).normalize();
+            const detectorDirection = new THREE.Vector3().subVectors(entry.detector.position, spotLight.position).normalize();
             if (lightDirection.dot(detectorDirection) > 0.90) {
                 lowerDoor(entry.puerta);
             }
